@@ -284,6 +284,13 @@ public:
                                         uint16_t dataTag, uint8_t dataNum, const vector<uint32_t> &tVec) throw(evioException);
 
   static evioDOMNodeP createEvioDOMNode(uint16_t tag, uint8_t num, uint16_t formatTag, const string &formatString,
+                                        uint16_t dataTag, uint8_t dataNum, const uint32_t* t, int len, int pad) throw(evioException);
+
+  static evioDOMNodeP createEvioDOMNode(uint16_t tag, uint8_t num, const string &formatString,
+					uint16_t dataTag, uint8_t dataNum, const uint32_t* t, const uint32_t* t_end) throw(evioException);
+
+  
+  static evioDOMNodeP createEvioDOMNode(uint16_t tag, uint8_t num, uint16_t formatTag, const string &formatString,
                                         uint16_t dataTag, uint8_t dataNum, const uint32_t* t, int len) throw(evioException);
 
   static evioDOMNodeP createUnknownEvioDOMNode(uint16_t tag, uint8_t num, const vector<uint32_t> &tVec) throw(evioException);
@@ -387,6 +394,7 @@ protected:
 public:
   uint16_t tag;            /**<The node tag, max 16-bits depending on container type.*/
   uint8_t num;             /**<The node num, max 8 bits, used by BANK and String container types (2-word header).*/
+  int fPadd;               
 };
 
 
@@ -478,6 +486,10 @@ protected:
                            uint16_t dataTag, uint8_t dataNum, const vector<uint32_t> &v) throw(evioException);
   evioCompositeDOMLeafNode(evioDOMNodeP par, uint16_t tag, uint8_t num, uint16_t formatTag, const string &formatString, 
                            uint16_t dataTag, uint8_t dataNum, const uint32_t *p, int ndata) throw(evioException);
+
+  evioCompositeDOMLeafNode(evioDOMNodeP par, uint16_t tag, uint8_t num, uint16_t formatTag, const string &formatString, 
+                           uint16_t dataTag, uint8_t dataNum, const uint32_t *p, int ndata, int fpad) throw(evioException);
+
   ~evioCompositeDOMLeafNode(void);
 
   evioCompositeDOMLeafNode(const evioCompositeDOMLeafNode &lNode) throw(evioException);
