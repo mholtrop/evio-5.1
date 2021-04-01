@@ -409,6 +409,8 @@ void *evioStreamParser::parseBank(const uint32_t *buf, int bankType, int depth,
  */
 evioDOMNode::evioDOMNode(evioDOMNodeP par, uint16_t tag, uint8_t num, int contentType) throw(evioException)
   : parent(par), parentTree(NULL), contentType(contentType), tag(tag), num(num)  {
+  // cout<<"Kuku3"<<endl;
+  // cout<<"tag in kuku3 = "<<tag<<endl;
 }
 
 
@@ -424,7 +426,7 @@ evioDOMNode::evioDOMNode(evioDOMNodeP par, uint16_t tag, uint8_t num, int conten
  */
 evioDOMNode::evioDOMNode(evioDOMNodeP par, const string &name, const evioDictionary *dictionary, int contentType) throw(evioException)
   : parent(par), parentTree(NULL), contentType(contentType) {
-
+  
   if(dictionary!=NULL) {
     tagNum tn = dictionary->getTagNum(name);
     tag=tn.first;
@@ -432,6 +434,7 @@ evioDOMNode::evioDOMNode(evioDOMNodeP par, const string &name, const evioDiction
   } else {
     throw(evioException(0,"?evioDOMNode constructor...NULL dictionary for bank name: " + name,__FILE__,__FUNCTION__,__LINE__));
   }
+
 }
 
 
@@ -574,7 +577,38 @@ evioDOMNodeP evioDOMNode::createEvioDOMNode(uint16_t tag, uint8_t num, uint16_t 
  */
 evioDOMNodeP evioDOMNode::createEvioDOMNode(uint16_t tag, uint8_t num, uint16_t formatTag, const string &formatString,
                                             uint16_t dataTag, uint8_t dataNum, const uint32_t* t, int len) throw(evioException) {
+  //cout<<"Kuku1"<<endl;
   return(new evioCompositeDOMLeafNode(NULL,tag,num,formatTag,formatString,dataTag,dataNum,t,len));
+}
+
+
+/**
+Added by Rafo, Testing for now
+ */
+evioDOMNodeP evioDOMNode::createEvioDOMNode(uint16_t tag, uint8_t num, uint16_t formatTag, const string &formatString,
+                                            uint16_t dataTag, uint8_t dataNum, const uint32_t* t, int len, int pad) throw(evioException) {
+  //cout<<"Kuku1"<<endl;
+  return(new evioCompositeDOMLeafNode(NULL,tag,num,formatTag,formatString,dataTag,dataNum,t,len, pad));
+}
+
+/**
+Added by Rafo, Testing for now
+With this method user needs to provide the beggining address (t) and the end address (t_end) of the data,
+then number of words and padding will be calculated inside the function.
+The user also don't need to provide the format tag, Sergei mentioned that he is using thhis
+parameter internally and he needs this to be equal to the format string length
+ */
+evioDOMNodeP evioDOMNode::createEvioDOMNode(uint16_t tag, uint8_t num, const string &formatString,
+                                            uint16_t dataTag, uint8_t dataNum, const uint32_t* t, const uint32_t* t_end) throw(evioException) {
+  //cout<<"Kuku1"<<endl;
+
+  int len = ((uint8_t*)t_end - (uint8_t*)t + 3)/4;
+  
+  int pad = (uint8_t*)t + 4*len - (uint8_t*)t_end;
+
+  uint16_t formatTag = strlen(formatString.c_str());
+  
+  return(new evioCompositeDOMLeafNode(NULL,tag,num,formatTag,formatString,dataTag,dataNum,t,len, pad));
 }
 
 
@@ -1284,7 +1318,23 @@ evioCompositeDOMLeafNode::evioCompositeDOMLeafNode(evioDOMNodeP par, uint16_t tg
                                                    uint16_t formatTag, const string &formatString, 
                                                    uint16_t dataTag, uint8_t dataNum, const uint32_t *p, int ndata) throw(evioException)
   : formatTag(formatTag), formatString(formatString), dataTag(dataTag), dataNum(dataNum), evioDOMLeafNode<uint32_t>(par,tg,num,p,ndata) {
+  // cout<<"Kuku2"<<endl;
+  // cout<<"tag = "<<tg<<endl;
   contentType=0xf;
+}
+
+/**
+   Made by Rafo, testing
+*/
+evioCompositeDOMLeafNode::evioCompositeDOMLeafNode(evioDOMNodeP par, uint16_t tg, uint8_t num,
+                                                   uint16_t formatTag, const string &formatString, 
+                                                   uint16_t dataTag, uint8_t dataNum, const uint32_t *p, int ndata, int padd) throw(evioException)
+  : formatTag(formatTag), formatString(formatString), dataTag(dataTag), dataNum(dataNum), evioDOMLeafNode<uint32_t>(par,tg,num,p,ndata) {
+  // cout<<"Kuku2"<<endl;
+  // cout<<"tag = "<<tg<<endl;
+  contentType=0xf;
+  fPadd = padd;
+  //cout<<"fPadd = "<<fPadd<<endl;
 }
 
 
@@ -1692,7 +1742,6 @@ void *evioDOMTree::leafNodeHandler(int bankLength, int containerType, int conten
       break;
     }
   }
-
 
   // add new leaf to parent
   evioDOMContainerNode *parent = (evioDOMContainerNode*)userArg;
@@ -2320,7 +2369,9 @@ int evioDOMTree::toEVIOBuffer(uint32_t *buf, const evioDOMNodeP pNode, int size)
         
         // data stored as uint32_t in bank
         buf[dataOffset+nfmtword+1] = ndata+1;
-        buf[dataOffset+nfmtword+2] = (leaf->dataTag<<16) | (0x1<<8) | leaf->dataNum;
+	padding = pNode->fPadd;
+	//cout<<"padding = "<<padding<<endl;
+        buf[dataOffset+nfmtword+2] = (leaf->dataTag<<16) | (padding<<14) | (0x1<<8) | leaf->dataNum;
         uint32_t *d = &buf[dataOffset+3+nfmtword];
         for(i=0; i<ndata; i++) d[i]=leaf->data[i];
       }
