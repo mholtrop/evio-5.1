@@ -30,7 +30,7 @@ if(APPLE)
 endif(APPLE)
 
 # Set a default build type if none was specified
-set(default_build_type "RELEASE")
+set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
     set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
@@ -145,7 +145,9 @@ export(TARGETS eviocxx
        FILE "${PROJECT_BINARY_DIR}/eviocxxTargets.cmake")
 
 # The following line will register the package in the *BUILD TREE* in the
-# package registry. This is probably not what we want. We want any code building against this
-# to build against the installed items.
-# export(PACKAGE eviocxx)
-
+# package registry. For production, this is probably not what we want.
+# We want production code to build against the installed library target.
+# For a DEBUG version however, it may be practical to build against the debug build tree.
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug" )
+#    export(PACKAGE eviocxx)
+#endif()
