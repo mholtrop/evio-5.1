@@ -18,7 +18,6 @@ include(CMakeFindDependencyMacro)
 message(STATUS "Checking for evio (sub project of eviocxx)")
 find_dependency(evio)
 
-message(STATUS "========== CMAKE_CURRENT_LIST_FILE = ${CMAKE_CURRENT_LIST_FILE} ")
 if(NOT TARGET eviocxx AND NOT TARGET eviocxx_static)
     include("${CMAKE_CURRENT_LIST_DIR}/eviocxxTargets.cmake")
 endif()

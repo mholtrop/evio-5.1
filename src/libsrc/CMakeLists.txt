@@ -95,6 +95,9 @@ add_library(evio       SHARED $<TARGET_OBJECTS:evio_objs>)
 add_library(evio_static STATIC $<TARGET_OBJECTS:evio_objs>)
 set_target_properties(evio_static PROPERTIES OUTPUT_NAME evio)   # So that the lib is not called libhipo4_static.a
 
+# Required on Unix OS family to be able to be linked into shared libraries.
+set_target_properties(evio_objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 target_include_directories(evio
                            PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
