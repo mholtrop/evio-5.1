@@ -108,7 +108,7 @@ add_library(eviocxx_static STATIC $<TARGET_OBJECTS:eviocxx-objs>)
 set_target_properties(eviocxx_static PROPERTIES OUTPUT_NAME eviocxx)   # So that the lib is not called libhipo4_static.a
 
 # Required on Unix OS family to be able to be linked into shared libraries.
-set_target_properties(eviocxx_objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(eviocxx-objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 
 add_dependencies(eviocxx evio)
